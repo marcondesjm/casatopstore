@@ -145,9 +145,9 @@ a {
   margin: 0 auto 18px;
   padding: 8px 16px;
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(198, 146, 106, 0.22), rgba(149, 64, 28, 0.12));
-  border: 1px solid rgba(149, 64, 28, 0.18);
-  color: var(--brand-dark);
+  background: linear-gradient(135deg, rgba(37, 211, 102, 0.18), rgba(21, 164, 93, 0.08));
+  border: 1px solid rgba(37, 211, 102, 0.28);
+  color: #0f8d49;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -376,8 +376,8 @@ a {
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--brand-soft), rgba(149, 64, 28, 0.09));
-  color: var(--brand-dark);
+  background: linear-gradient(135deg, rgba(37, 211, 102, 0.14), rgba(37, 211, 102, 0.05));
+  color: #25D366;
   flex-shrink: 0;
 }
 

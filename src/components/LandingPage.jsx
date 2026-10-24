@@ -39,7 +39,7 @@ const defaultConfig = {
     label: 'ENTRAR NO GRUPO VIP',
     link: 'https://chat.whatsapp.com/KBQB7Bi4qRf2waQdNzgkaj',
     subtext: 'Gratuito • Silencioso • Curadoria Real',
-    color: '#b76542'
+    color: '#25D366'
   },
   proof: [
     { value: '3.000+', label: 'clientes ativos' },
@@ -115,6 +115,7 @@ const LandingPage = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
   const [isAdminLogged, setIsAdminLogged] = useState(false);
+  const [showCredit, setShowCredit] = useState(false);
   const [config, setConfig] = useState(defaultConfig);
 
   useEffect(() => {
@@ -133,6 +134,40 @@ const LandingPage = () => {
     };
 
     boot();
+  }, []);
+
+  useEffect(() => {
+    const handleContextMenu = (event) => {
+      event.preventDefault();
+      setShowCredit(true);
+    };
+
+    const handleKeyDown = (event) => {
+      const devToolsKeys = ['F12', 'Shift', 'Control', 'Meta', 'Alt'];
+
+      const isBlockedShortcut =
+        event.key === 'F12' ||
+        (event.ctrlKey && event.key.toLowerCase() === 'u') ||
+        (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'i') ||
+        (event.metaKey && event.key.toLowerCase() === 'u') ||
+        (event.metaKey && event.shiftKey && event.key.toLowerCase() === 'i') ||
+        (event.ctrlKey && event.key.toLowerCase() === 's') ||
+        (event.metaKey && event.key.toLowerCase() === 's') ||
+        devToolsKeys.includes(event.key);
+
+      if (isBlockedShortcut) {
+        event.preventDefault();
+        setShowCredit(true);
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const names = [
@@ -217,8 +252,8 @@ const LandingPage = () => {
   };
 
   const ctaButtonStyle = {
-    background: `linear-gradient(135deg, ${config.cta.color || config.palette?.primary || '#95401C'}, ${config.palette?.primary || '#95401C'} 42%, ${config.palette?.accent || '#BD9965'} 100%)`,
-    boxShadow: `0 18px 40px ${config.cta.color ? `${config.cta.color}66` : `${config.palette?.primary || '#95401C'}66`}`
+    background: `linear-gradient(135deg, ${config.cta.color || '#25D366'}, ${config.cta.color || '#25D366'} 42%, #1faa5a 100%)`,
+    boxShadow: `0 18px 40px ${config.cta.color ? `${config.cta.color}66` : '#25D36666'}`
   };
 
   const handleWhatsAppClick = (e) => {
@@ -349,7 +384,7 @@ const LandingPage = () => {
               {config.cta.label}
             </a>
             <div className={styles.ctaSubtext}>
-              <i className="fas fa-lock" style={{ color: '#BBB' }}></i> {config.cta.subtext}
+              <i className="fas fa-lock" style={{ color: '#25D366' }}></i> {config.cta.subtext}
             </div>
           </div>
 
@@ -393,28 +428,16 @@ const LandingPage = () => {
               {' • '}
               <a href="#privacy" onClick={(e) => { e.preventDefault(); setLegalModal('privacy'); }}>Privacidade</a>
             </div>
-            <div className={styles.footerActions}>
-              {isAdminLogged ? (
-                <>
-                  <button type="button" className={styles.adminButton} onClick={() => setAdminOpen(!adminOpen)}>
-                    {adminOpen ? 'Fechar painel' : 'Editar'}
-                  </button>
-                  <button type="button" className={styles.secondaryButton} onClick={handleAdminLogout}>Sair</button>
-                </>
-              ) : (
-                <button type="button" className={styles.adminButton} onClick={() => setAdminLoginOpen(true)}>
-                  Acesso admin
-                </button>
-              )}
-            </div>
           </footer>
 
-          <div className={styles.footerNote}>
-            © 2026 Casa Top Store. Todos os direitos reservados. | Site criado por{' '}
-            <a href="https://www.instagram.com/marcondes.machado.oficial/" target="_blank" rel="noreferrer">
-              @marcondes.machado.oficial
-            </a>
-          </div>
+          {showCredit && (
+            <div className={styles.footerNote}>
+              © 2026 Casa Top Store. Todos os direitos reservados. | Site criado por{' '}
+              <a href="https://www.instagram.com/marcondes.machado.oficial/" target="_blank" rel="noreferrer">
+                @marcondes.machado.oficial
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
