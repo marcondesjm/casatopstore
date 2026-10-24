@@ -13,7 +13,7 @@ const defaultConfig = {
     image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80&crop=faces',
     alt: 'casatopstore'
   },
-  badge: 'Curadoria premium • vagas limitadas',
+  badge: 'Grupo premium • vagas limitadas',
   title: {
     line1: 'Últimas Vagas para',
     line2: 'Economizar Agora'
