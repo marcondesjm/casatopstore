@@ -14,6 +14,13 @@ const defaultConfig = {
     alt: 'casatopstore'
   },
   badge: 'Grupo premium • vagas limitadas',
+  palette: {
+    primary: '#95401C',
+    secondary: '#6f2f18',
+    soft: '#DED6C8',
+    accent: '#BD9965',
+    background: '#f6f1eb'
+  },
   title: {
     line1: 'Últimas Vagas para',
     line2: 'Economizar Agora'
@@ -185,9 +192,17 @@ const LandingPage = () => {
     });
   };
 
+  const themeVars = {
+    '--brand': config.palette?.primary || '#95401C',
+    '--brand-dark': config.palette?.secondary || '#6f2f18',
+    '--brand-soft': config.palette?.soft || '#DED6C8',
+    '--gold': config.palette?.accent || '#BD9965',
+    '--page-bg': config.palette?.background || '#f6f1eb'
+  };
+
   const ctaButtonStyle = {
-    background: `linear-gradient(135deg, ${config.cta.color || '#b76542'}, #c25d39 42%, #d7a15b 100%)`,
-    boxShadow: `0 18px 40px ${config.cta.color ? `${config.cta.color}66` : 'rgba(149, 64, 28, 0.26)'}`
+    background: `linear-gradient(135deg, ${config.cta.color || config.palette?.primary || '#95401C'}, ${config.palette?.primary || '#95401C'} 42%, ${config.palette?.accent || '#BD9965'} 100%)`,
+    boxShadow: `0 18px 40px ${config.cta.color ? `${config.cta.color}66` : `${config.palette?.primary || '#95401C'}66`}`
   };
 
   const handleWhatsAppClick = (e) => {
@@ -283,7 +298,7 @@ const LandingPage = () => {
         </div>
       </div>
 
-      <div className={styles.mainWrapper}>
+      <div className={styles.mainWrapper} style={themeVars}>
         <div className={styles.container}>
           <div className={styles.logoFrame}>
             <div className={styles.logoInner}>
@@ -377,6 +392,13 @@ const LandingPage = () => {
               )}
             </div>
           </footer>
+
+          <div className={styles.footerNote}>
+            © 2026 Casa Top Store. Todos os direitos reservados. | Site criado por{' '}
+            <a href="https://www.instagram.com/marcondes.machado.oficial/" target="_blank" rel="noreferrer">
+              @marcondes.machado.oficial
+            </a>
+          </div>
         </div>
       </div>
 
@@ -423,6 +445,51 @@ const LandingPage = () => {
               <label>
                 <span>Badge</span>
                 <input value={config.badge} onChange={(e) => setConfig({ ...config, badge: e.target.value })} />
+              </label>
+
+              <label>
+                <span>Cor principal</span>
+                <input
+                  type="color"
+                  value={config.palette?.primary || '#95401C'}
+                  onChange={(e) => setConfig({ ...config, palette: { ...config.palette, primary: e.target.value } })}
+                />
+              </label>
+
+              <label>
+                <span>Cor secundária</span>
+                <input
+                  type="color"
+                  value={config.palette?.secondary || '#6f2f18'}
+                  onChange={(e) => setConfig({ ...config, palette: { ...config.palette, secondary: e.target.value } })}
+                />
+              </label>
+
+              <label>
+                <span>Cor de destaque</span>
+                <input
+                  type="color"
+                  value={config.palette?.accent || '#BD9965'}
+                  onChange={(e) => setConfig({ ...config, palette: { ...config.palette, accent: e.target.value } })}
+                />
+              </label>
+
+              <label>
+                <span>Cor suave</span>
+                <input
+                  type="color"
+                  value={config.palette?.soft || '#DED6C8'}
+                  onChange={(e) => setConfig({ ...config, palette: { ...config.palette, soft: e.target.value } })}
+                />
+              </label>
+
+              <label>
+                <span>Cor de fundo</span>
+                <input
+                  type="color"
+                  value={config.palette?.background || '#f6f1eb'}
+                  onChange={(e) => setConfig({ ...config, palette: { ...config.palette, background: e.target.value } })}
+                />
               </label>
 
               <label>

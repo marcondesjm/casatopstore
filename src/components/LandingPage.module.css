@@ -409,6 +409,22 @@ a {
   letter-spacing: 0.02em;
 }
 
+.footerNote {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--muted);
+  position: relative;
+  z-index: 1;
+}
+
+.footerNote a {
+  color: var(--brand-dark);
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .footerLinks,
 .zecaCredits {
   display: flex;
