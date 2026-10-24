@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styles from './LandingPage.module.css';
 
 const ADMIN_PASSWORD = 'casatopstore123';
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 const defaultConfig = {
   topBar: {

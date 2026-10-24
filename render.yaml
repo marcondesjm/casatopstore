@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: casatopstore-api
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: ADMIN_PASSWORD
+        value: casatopstore123
+      - key: SESSION_SECRET
+        value: casatopstore-admin-session-secret

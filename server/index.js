@@ -8,7 +8,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 const configPath = path.join(__dirname, 'data', 'siteConfig.json');
-const adminPassword = 'casatopstore123';
+const adminPassword = process.env.ADMIN_PASSWORD || 'casatopstore123';
+const sessionSecret = process.env.SESSION_SECRET || 'casatopstore-admin-session-secret';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const defaultConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
@@ -46,13 +48,13 @@ const port = Number(process.env.PORT || 3001);
 app.use(express.json({ limit: '10mb' }));
 app.use(
   session({
-    secret: 'casatopstore-admin-session-secret',
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false,
+      secure: isProduction,
       maxAge: 1000 * 60 * 60 * 8
     }
   })
