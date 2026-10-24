@@ -145,8 +145,8 @@ a {
   margin: 0 auto 18px;
   padding: 8px 16px;
   border-radius: 999px;
-  background: rgba(149, 64, 28, 0.08);
-  border: 1px solid rgba(149, 64, 28, 0.12);
+  background: linear-gradient(135deg, rgba(198, 146, 106, 0.22), rgba(149, 64, 28, 0.12));
+  border: 1px solid rgba(149, 64, 28, 0.18);
   color: var(--brand-dark);
   font-size: 0.72rem;
   font-weight: 800;
@@ -154,6 +154,7 @@ a {
   text-transform: uppercase;
   position: relative;
   z-index: 1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
 }
 
 .title {
