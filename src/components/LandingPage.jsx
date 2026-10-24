@@ -10,7 +10,7 @@ const defaultConfig = {
     text2: 'ATUALIZADO POR @casatopstore 💅 ACHADOS REAIS, DESCONTOS DE VERDADE'
   },
   logo: {
-    image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80&crop=faces',
+    image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80&crop=faces',
     alt: 'casatopstore'
   },
   badge: 'Curadoria premium • vagas limitadas',
