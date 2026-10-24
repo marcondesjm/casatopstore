@@ -83,7 +83,6 @@ const LandingPage = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
   const [isAdminLogged, setIsAdminLogged] = useState(false);
-  const [showCredit, setShowCredit] = useState(false);
   const [config, setConfig] = useState(defaultConfig);
 
   useEffect(() => {
@@ -123,40 +122,6 @@ const LandingPage = () => {
       setTimeout(() => { if (active) syncSession(session); }, 0);
     });
     return () => { active = false; listener?.data.subscription.unsubscribe(); };
-  }, []);
-
-  useEffect(() => {
-    const handleContextMenu = (event) => {
-      event.preventDefault();
-      setShowCredit(true);
-    };
-
-    const handleKeyDown = (event) => {
-      const devToolsKeys = ['F12', 'Shift', 'Control', 'Meta', 'Alt'];
-
-      const isBlockedShortcut =
-        event.key === 'F12' ||
-        (event.ctrlKey && event.key.toLowerCase() === 'u') ||
-        (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'i') ||
-        (event.metaKey && event.key.toLowerCase() === 'u') ||
-        (event.metaKey && event.shiftKey && event.key.toLowerCase() === 'i') ||
-        (event.ctrlKey && event.key.toLowerCase() === 's') ||
-        (event.metaKey && event.key.toLowerCase() === 's') ||
-        devToolsKeys.includes(event.key);
-
-      if (isBlockedShortcut) {
-        event.preventDefault();
-        setShowCredit(true);
-      }
-    };
-
-    document.addEventListener('contextmenu', handleContextMenu);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('contextmenu', handleContextMenu);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
   }, []);
 
   const names = [

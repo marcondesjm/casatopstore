@@ -880,3 +880,15 @@ a {
 @media (max-width: 600px) {
   .adminGrid, .adminGroup { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Explicit light controls keep typed text visible with browser dark mode. */
+.loginPanel, .adminPanel { color-scheme: light; color: #35251f; }
+.loginField input, .adminGrid input, .adminGrid textarea {
+  color: #35251f;
+  -webkit-text-fill-color: #35251f;
+  caret-color: #95401c;
+}
+.loginField input:focus-visible, .adminGrid input:focus-visible, .adminGrid textarea:focus-visible {
+  outline: 2px solid #95401c;
+  outline-offset: 2px;
+}
