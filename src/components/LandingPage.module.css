@@ -875,3 +875,8 @@ a {
     transform: rotate(360deg);
   }
 }
+
+.adminFields { border: 0; padding: 0; margin: 0; min-width: 0; }
+@media (max-width: 600px) {
+  .adminGrid, .adminGroup { grid-template-columns: minmax(0, 1fr); }
+}

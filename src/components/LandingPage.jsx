@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react';
 import heroImage from '../assets/hero.png';
 import styles from './LandingPage.module.css';
+import { supabase, requireSupabase, readSiteConfig, isSiteAdmin, writeSiteConfig } from '../utils/supabase';
 
-const ADMIN_PASSWORD = 'casatopstore123';
-const API_BASE = import.meta.env.VITE_API_BASE || (
-  typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    ? 'http://localhost:3001/api'
-    : '/api'
-);
+const adminEntry = window.location.hostname.startsWith('admin.') || window.location.pathname === '/admin' || window.location.pathname === '/admin/';
 
 const defaultConfig = {
   topBar: {
@@ -75,43 +71,15 @@ const defaultConfig = {
   }
 };
 
-const fetchJson = async (url, options = {}) => {
-  const response = await fetch(url, {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    },
-    ...options
-  });
-
-  const raw = await response.text();
-
-  if (!raw) {
-    return {};
-  }
-
-  let payload;
-  try {
-    payload = JSON.parse(raw);
-  } catch (error) {
-    const message = `Resposta inválida da API. Verifique se o backend está rodando em ${API_BASE}.`;
-    throw new Error(message);
-  }
-
-  if (!response.ok) {
-    throw new Error(payload.message || 'Erro inesperado.');
-  }
-
-  return payload;
-};
-
 const LandingPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState({ visible: false, name: '', action: '' });
   const [legalModal, setLegalModal] = useState(null);
   const [adminOpen, setAdminOpen] = useState(false);
-  const [adminLoginOpen, setAdminLoginOpen] = useState(false);
+  const [adminLoginOpen, setAdminLoginOpen] = useState(adminEntry);
+  const [adminEmail, setAdminEmail] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedConfig, setSavedConfig] = useState(defaultConfig);
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
   const [isAdminLogged, setIsAdminLogged] = useState(false);
@@ -119,21 +87,42 @@ const LandingPage = () => {
   const [config, setConfig] = useState(defaultConfig);
 
   useEffect(() => {
+    let active = true;
+    const syncSession = async (session) => {
+      try {
+        const allowed = await isSiteAdmin(session?.user?.id);
+        if (!active) return;
+        setIsAdminLogged(allowed);
+        setAdminOpen(adminEntry && allowed);
+        setAdminLoginOpen(adminEntry && !allowed);
+        if (session && !allowed) setAdminError('Esta conta não tem permissão de administrador.');
+      } catch (error) {
+        if (active) setAdminError(error.message);
+      }
+    };
     const boot = async () => {
       try {
-        const [session, configData] = await Promise.all([
-          fetchJson(`${API_BASE}/auth/session`),
-          fetchJson(`${API_BASE}/config`)
-        ]);
-
-        setIsAdminLogged(Boolean(session.authenticated));
-        setConfig(configData.config || defaultConfig);
+        const client = requireSupabase();
+        const content = await readSiteConfig();
+        if (active && content) {
+          const next = { ...defaultConfig, ...content };
+          setConfig(next);
+          setSavedConfig(next);
+        }
+        const { data, error } = await client.auth.getSession();
+        if (error) throw error;
+        await syncSession(data.session);
       } catch (error) {
+        if (active) setAdminError(error.message);
         console.error('Erro ao carregar configuração:', error);
       }
     };
-
     boot();
+    const listener = supabase?.auth.onAuthStateChange((_event, session) => {
+      // Run database requests outside the auth callback lock.
+      setTimeout(() => { if (active) syncSession(session); }, 0);
+    });
+    return () => { active = false; listener?.data.subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => {
@@ -183,29 +172,9 @@ const LandingPage = () => {
     const timer = setTimeout(() => { showNotification(); }, 2000);
     const notificationInterval = setInterval(showNotification, 6000);
 
-    const scarcityInterval = setInterval(() => {
-      setConfig((prev) => {
-        const current = prev.scarcity;
-        const direction = Math.random() > 0.8 ? -1 : 1;
-        const delta = Math.random() > 0.7 ? 1 : 2;
-        const nextPercent = Math.min(92, Math.max(65, current.percent + (direction * delta)));
-        const nextRemaining = Math.max(4, Math.min(20, Math.round((100 - nextPercent) / 5.2)));
-
-        return {
-          ...prev,
-          scarcity: {
-            ...current,
-            percent: nextPercent,
-            remaining: nextRemaining
-          }
-        };
-      });
-    }, 15000);
-
     return () => {
       clearTimeout(timer);
       clearInterval(notificationInterval);
-      clearInterval(scarcityInterval);
     };
   }, []);
 
@@ -217,18 +186,24 @@ const LandingPage = () => {
   };
 
   const saveConfig = async (nextConfig) => {
+    setIsSaving(true);
+    setAdminError('');
     try {
-      const response = await fetchJson(`${API_BASE}/config`, {
-        method: 'PUT',
-        body: JSON.stringify(nextConfig)
-      });
-
-      setConfig(response.config || nextConfig);
+      await writeSiteConfig(nextConfig);
+      setConfig(nextConfig);
+      setSavedConfig(structuredClone(nextConfig));
       return true;
     } catch (error) {
       setAdminError(error.message || 'Não foi possível salvar a edição.');
       return false;
+    } finally {
+      setIsSaving(false);
     }
+  };
+
+  const closeAdmin = () => {
+    setConfig(structuredClone(savedConfig));
+    setAdminOpen(false);
   };
 
   const handleFieldChange = (section, index, field, value) => {
@@ -272,6 +247,7 @@ const LandingPage = () => {
 
   const handleReset = async () => {
     if (isAdminLogged) {
+      if (!window.confirm('Restaurar o conteúdo padrão? Esta ação substituirá o conteúdo salvo.')) return;
       const saved = await saveConfig(defaultConfig);
       if (saved) {
         setAdminOpen(false);
@@ -286,10 +262,13 @@ const LandingPage = () => {
     event.preventDefault();
 
     try {
-      await fetchJson(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        body: JSON.stringify({ password: adminPassword })
-      });
+      const client = requireSupabase();
+      const { data, error } = await client.auth.signInWithPassword({ email: adminEmail, password: adminPassword });
+      if (error) throw new Error('E-mail ou senha inválidos.');
+      if (!await isSiteAdmin(data.user.id)) {
+        await client.auth.signOut();
+        throw new Error('Esta conta não tem permissão de administrador.');
+      }
 
       setIsAdminLogged(true);
       setAdminLoginOpen(false);
@@ -303,11 +282,14 @@ const LandingPage = () => {
 
   const handleAdminLogout = async () => {
     try {
-      await fetchJson(`${API_BASE}/auth/logout`, { method: 'POST' });
+      const { error } = await requireSupabase().auth.signOut();
+      if (error) throw error;
     } catch (error) {
-      console.error('Erro ao sair:', error);
+      setAdminError(error.message);
+      return;
     }
 
+    setConfig(structuredClone(savedConfig));
     setIsAdminLogged(false);
     setAdminOpen(false);
     setAdminLoginOpen(false);
@@ -318,6 +300,10 @@ const LandingPage = () => {
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) || file.size > 2 * 1024 * 1024) {
+      setAdminError('Escolha uma imagem PNG, JPEG, WebP ou GIF de até 2 MB.');
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -331,9 +317,6 @@ const LandingPage = () => {
 
       setConfig(nextConfig);
 
-      if (isAdminLogged) {
-        saveConfig(nextConfig);
-      }
     };
     reader.readAsDataURL(file);
   };
@@ -424,6 +407,8 @@ const LandingPage = () => {
 
           <footer className={styles.footer}>
             <div className={styles.footerLinks}>
+              {adminEntry && <button type="button" onClick={() => isAdminLogged ? setAdminOpen(true) : setAdminLoginOpen(true)}>Abrir painel</button>}
+
               <a href="#terms" onClick={(e) => { e.preventDefault(); setLegalModal('terms'); }}>Termos de Uso</a>
               {' • '}
               <a href="#privacy" onClick={(e) => { e.preventDefault(); setLegalModal('privacy'); }}>Privacidade</a>
@@ -448,9 +433,15 @@ const LandingPage = () => {
             </div>
 
             <label className={styles.loginField}>
+              <span>E-mail</span>
+              <input type="email" required autoComplete="username" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
+            </label>
+            <label className={styles.loginField}>
               <span>Senha</span>
               <input
                 type="password"
+                required
+                autoComplete="current-password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 placeholder="Digite a senha"
@@ -468,16 +459,18 @@ const LandingPage = () => {
       )}
 
       {adminOpen && isAdminLogged && (
-        <div className={styles.adminOverlay} onClick={() => setAdminOpen(false)}>
+        <div className={styles.adminOverlay} onClick={closeAdmin}>
           <div className={styles.adminPanel} onClick={(e) => e.stopPropagation()}>
             <div className={styles.adminHeader}>
               <h3>Painel de edição</h3>
               <div className={styles.headerActions}>
                 <button type="button" className={styles.secondaryButton} onClick={handleAdminLogout}>Sair</button>
-                <button type="button" onClick={() => setAdminOpen(false)}>Fechar</button>
+                <button type="button" onClick={closeAdmin}>Fechar</button>
               </div>
             </div>
 
+            {adminError && <p role="alert" className={styles.loginError}>{adminError}</p>}
+            <fieldset disabled={isSaving} className={styles.adminFields}>
             <div className={styles.adminGrid}>
               <label>
                 <span>Badge</span>
@@ -662,9 +655,10 @@ const LandingPage = () => {
                   }
                 }}
               >
-                Salvar
+                {isSaving ? 'Salvando…' : 'Salvar'}
               </button>
             </div>
+            </fieldset>
           </div>
         </div>
       )}
