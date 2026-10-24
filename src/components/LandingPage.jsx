@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
+import heroImage from '../assets/hero.png';
 import styles from './LandingPage.module.css';
 
 const ADMIN_PASSWORD = 'casatopstore123';
-const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+const API_BASE = import.meta.env.VITE_API_BASE || (
+  typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:3001/api'
+    : '/api'
+);
 
 const defaultConfig = {
   topBar: {
@@ -10,7 +15,7 @@ const defaultConfig = {
     text2: 'ATUALIZADO POR @casatopstore 💅 ACHADOS REAIS, DESCONTOS DE VERDADE'
   },
   logo: {
-    image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80&crop=faces',
+    image: heroImage,
     alt: 'casatopstore'
   },
   badge: 'Grupo premium • vagas limitadas',
@@ -81,7 +86,18 @@ const fetchJson = async (url, options = {}) => {
   });
 
   const raw = await response.text();
-  const payload = raw ? JSON.parse(raw) : {};
+
+  if (!raw) {
+    return {};
+  }
+
+  let payload;
+  try {
+    payload = JSON.parse(raw);
+  } catch (error) {
+    const message = `Resposta inválida da API. Verifique se o backend está rodando em ${API_BASE}.`;
+    throw new Error(message);
+  }
 
   if (!response.ok) {
     throw new Error(payload.message || 'Erro inesperado.');
