@@ -430,14 +430,12 @@ const LandingPage = () => {
             </div>
           </footer>
 
-          {showCredit && (
-            <div className={styles.footerNote}>
-              © 2026 Casa Top Store. Todos os direitos reservados. | Site criado por{' '}
-              <a href="https://www.instagram.com/marcondes.machado.oficial/" target="_blank" rel="noreferrer">
-                @marcondes.machado.oficial
-              </a>
-            </div>
-          )}
+          <div className={styles.footerNote}>
+            © 2026 Casa Top Store. Todos os direitos reservados. | Site criado por{' '}
+            <a href="https://www.instagram.com/marcondes.machado.oficial/" target="_blank" rel="noreferrer">
+              @marcondes.machado.oficial
+            </a>
+          </div>
         </div>
       </div>
 
