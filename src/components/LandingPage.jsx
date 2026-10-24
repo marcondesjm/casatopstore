@@ -26,7 +26,8 @@ const defaultConfig = {
   cta: {
     label: 'ENTRAR NO GRUPO VIP',
     link: 'https://chat.whatsapp.com/KBQB7Bi4qRf2waQdNzgkaj',
-    subtext: 'Gratuito • Silencioso • Curadoria Real'
+    subtext: 'Gratuito • Silencioso • Curadoria Real',
+    color: '#b76542'
   },
   proof: [
     { value: '3.000+', label: 'clientes ativos' },
@@ -184,6 +185,11 @@ const LandingPage = () => {
     });
   };
 
+  const ctaButtonStyle = {
+    background: `linear-gradient(135deg, ${config.cta.color || '#b76542'}, #c25d39 42%, #d7a15b 100%)`,
+    boxShadow: `0 18px 40px ${config.cta.color ? `${config.cta.color}66` : 'rgba(149, 64, 28, 0.26)'}`
+  };
+
   const handleWhatsAppClick = (e) => {
     e.preventDefault();
     if (typeof window.fbq !== 'undefined') {
@@ -305,6 +311,7 @@ const LandingPage = () => {
             <a
               href={config.cta.link}
               className={`${styles.ctaBtn} ${styles.pulseAnimation}`}
+              style={ctaButtonStyle}
               onClick={handleWhatsAppClick}
             >
               <i className="fab fa-whatsapp" style={{ fontSize: '20px' }}></i>
@@ -441,6 +448,15 @@ const LandingPage = () => {
               <label>
                 <span>Texto do CTA</span>
                 <input value={config.cta.label} onChange={(e) => setConfig({ ...config, cta: { ...config.cta, label: e.target.value } })} />
+              </label>
+
+              <label>
+                <span>Cor do botão</span>
+                <input
+                  type="color"
+                  value={config.cta.color || '#b76542'}
+                  onChange={(e) => setConfig({ ...config, cta: { ...config.cta, color: e.target.value } })}
+                />
               </label>
 
               <label>
